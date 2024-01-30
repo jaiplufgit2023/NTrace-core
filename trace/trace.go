@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/nxtrace/NTrace-core/ipgeo"
@@ -92,7 +93,11 @@ func Traceroute(method Method, config Config) (*Result, error) {
 	default:
 		return &Result{}, ErrInvalidMethod
 	}
-	return tracer.Execute()
+	result, err := tracer.Execute()
+	if err != nil && errors.Is(err, syscall.EPERM) {
+		err = fmt.Errorf("%w, please run as root", err)
+	}
+	return result, err
 }
 
 type Result struct {
@@ -141,7 +146,7 @@ func (h *Hop) fetchIPData(c Config) (err error) {
 			h.Hostname = r[0][:len(r[0])-1]
 			ip = h.Address.String() + "," + h.Hostname
 		}
-		h.Geo, err = c.IPGeoSource(ip, c.Timeout, c.Lang, c.Maptrace)
+		h.Geo, _ = c.IPGeoSource(ip, c.Timeout, c.Lang, c.Maptrace)
 		return nil
 	}
 
@@ -200,7 +205,7 @@ func (h *Hop) fetchIPData(c Config) (err error) {
 	if !c.AlwaysWaitRDNS {
 		select {
 		case <-fetchDoneChan:
-			// When fetch done signal recieved, stop waiting PTR record
+			// When fetch done signal received, stop waiting PTR record
 		case ptr := <-rDNSChan:
 			// process result
 			if err == nil && len(ptr) > 0 {
@@ -221,9 +226,9 @@ func (h *Hop) fetchIPData(c Config) (err error) {
 		selectClose = true
 	}
 
-	// When Select Close, fetchDoneChan Reciever will also be closed
+	// When Select Close, fetchDoneChan Received will also be closed
 	if selectClose {
-		// New a reciever to prevent channel congestion
+		// New a receiver to prevent channel congestion
 		<-fetchDoneChan
 	}
 

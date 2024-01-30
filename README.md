@@ -10,6 +10,10 @@
 
 <h4 align="center">An open source visual routing tool that pursues light weight, developed using Golang.</h4>
 
+---------------------------------------
+
+<h6 align="center">HomePage: www.nxtrace.org</h6>
+
 <p align="center">
   <a href="https://github.com/nxtrace/Ntrace-V1/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/nxtrace/Ntrace-V1/build.yml?branch=main&style=flat-square" alt="Github Actions">
@@ -17,7 +21,7 @@
   <a href="https://goreportcard.com/report/github.com/nxtrace/Ntrace-V1">
     <img src="https://goreportcard.com/badge/github.com/nxtrace/Ntrace-V1?style=flat-square">
   </a>
-  <a href="https://github.com/nxtrace/Ntrace-V1/releases">
+  <a href="https://www.nxtrace.org/downloads">
     <img src="https://img.shields.io/github/release/nxtrace/Ntrace-V1/all.svg?style=flat-square">
   </a>
   <a href="https://telegram.dog/sjprojects">
@@ -29,25 +33,28 @@
 
 <div style="text-align: center;">
     <a href="https://dmit.io">
-        <img src="https://www.dmit.io/templates/dmit_theme_2020/dmit/assets/images/dmit_logo_with_text_blue.svg" width="170.7" height="62.9">
+        <img src="https://assets.nxtrace.org/dmit.svg" width="170.7" height="62.9">
     </a>
     &nbsp;&nbsp;&nbsp;&nbsp;
     <a href="https://misaka.io" >
-        <img src="https://www.jsdelivr.com/assets/8997e39e1f9d776502ab4d7cdff9d1608aa67aaf/img/globalping/sponsors/misaka.svg" width="170.7" height="62.9">
+        <img src="https://assets.nxtrace.org/misaka.svg" width="170.7" height="62.9">
     </a>
     &nbsp;&nbsp;&nbsp;&nbsp;
-    <a href="https://skywolf.cloud" >
-        <img src="https://github.com/nxtrace/Ntrace-core/assets/59512455/19b659f4-31f5-4816-9821-bf2a73c60336" width="170.7" height="62.9">
+    <a href="https://portal.saltyfish.io" >
+        <img src="https://assets.nxtrace.org/snapstack.svg" width="170.7" height="62.9">
     </a>
 </div>
 
-We are extremely grateful to [DMIT](https://dmit.io) and [Misaka](https://misaka.io) and [Skywolf](https://skywolf.cloud) for providing the network infrastructure that powers this project.
+We are extremely grateful to [DMIT](https://dmit.io), [Misaka](https://misaka.io) and [SnapStack](https://portal.saltyfish.io) for providing the network infrastructure that powers this project.
 
 ## How To Use
 
 Document Language: English | [简体中文](README_zh_CN.md)
 
-⚠️ This is the README for the V1 Enhanced version of NextTrace.
+⚠️ Please note: We welcome PR submissions from the community, but please submit your PRs to the [NTrace-V1](https://github.com/nxtrace/NTrace-V1) repository instead of [NTrace-core](https://github.com/nxtrace/NTrace-core) repository.<br>
+Regarding the NTrace-V1 and NTrace-core repositories:<br>
+Both will largely remain consistent with each other. All development work is done within the NTrace-V1 repository. The NTrace-V1 repository releases new versions first. After running stably for an undetermined period, we will synchronize that version to NTrace-core. This means that the NTrace-V1 repository serves as a "beta" or "testing" version.<br>
+Please note, there are exceptions to this synchronization. If a version of NTrace-V1 encounters a serious bug, NTrace-core will skip that flawed version and synchronize directly to the next version that resolves the issue.
 
 ### Automated Install
 
@@ -55,23 +62,28 @@ Document Language: English | [简体中文](README_zh_CN.md)
     * One-click installation script
 
       ```shell
-      bash -c "$(curl http://nexttrace-io-leomoe-api-a0.shop/nt_install_v1.sh)"
+      curl nxtrace.org/nt |bash
       ```
     * Arch Linux AUR installation command
-        * Build from source
-
-             ```shell
-             yay -S nexttrace
-             ```
         * Directly download bin package (only supports amd64)
 
              ```shell
              yay -S nexttrace-bin
              ```
-        * The two types of AUR builds are maintained by huyz and ouuan, respectively
+        * The AUR builds are maintained by ouuan
     * Linuxbrew's installation command
 
         Same as the macOS Homebrew's installation method (homebrew-core version only supports amd64)
+    * Deepin installation command
+
+      ```shell
+      apt install nexttrace
+      ```
+    * Termux installation command
+
+      ```shell
+      pkg install nexttrace-enhanced
+      ```
 
 * macOS
     * macOS Homebrew's installation command
@@ -83,7 +95,7 @@ Document Language: English | [简体中文](README_zh_CN.md)
         * This repository's ACTIONS automatically built version (updates faster)
 
              ```shell
-             brew tap xgadget-lab/nexttrace && brew install xgadget-lab/nexttrace/nexttrace
+             brew tap nxtrace/nexttrace && brew install nxtrace/nexttrace/nexttrace
              ```
         * The homebrew-core build is maintained by chenrui333, please note that this version's updates may lag behind the repository Action automatically version
 
@@ -102,7 +114,7 @@ Document Language: English | [简体中文](README_zh_CN.md)
 ### Manual Install
 * Download the precompiled executable
 
-    For users not covered by the above methods, please go directly to [Release](https://github.com/nxtrace/Ntrace-V1/releases/latest) to download the compiled binary executable.
+    For users not covered by the above methods, please go directly to [Release](https://www.nxtrace.org/downloads) to download the compiled binary executable.
 
     * `Release` provides compiled binary executables for many systems and different architectures. If none are available, you can compile it yourself.
     * Some essential dependencies of this project are not fully implemented on `Windows` by `Golang`, so currently, `NextTrace` is in an experimental support phase on the `Windows` platform.
@@ -112,10 +124,15 @@ Document Language: English | [简体中文](README_zh_CN.md)
     After installing Go >= 1.20 yourself, you can use the following command to install
 
     ```shell
-    go install github.com/nxtrace/Ntrace-V1@latest
+    go install github.com/nxtrace/NTrace-core@latest
     ```
+    *because of the version constraints conflict, you can not install  `NTrace-V1` by this*
     After installation, the executable is in the `$GOPATH/bin` directory. If you have not set `GOPATH`, it is in the `$HOME/go/bin` directory.
-
+    The binary file name is consistent with the project name. You need to replace the `nexttrace` command below with `NTrace-core`.
+     If you want to be consistent with the commands below, you can rename the binary after executing the `go install` command
+    ```shell
+    mv  $GOPATH/bin/NTrace-core $GOPATH/bin/nexttrace
+    ``` 
 
 ### Get Started
 
@@ -134,7 +151,7 @@ nexttrace --table 1.0.0.1
 nexttrace --raw 1.0.0.1
 nexttrace --json 1.0.0.1
 
-# IPv4/IPv6 Resolve Only
+# IPv4/IPv6 Resolve Only, and automatically select the first IP when there are multiple IPs
 nexttrace --ipv4 g.co
 nexttrace --ipv6 g.co
 
@@ -143,7 +160,7 @@ nexttrace 2606:4700:4700::1111
 
 # Disable Path Visualization With the -M parameter
 nexttrace koreacentral.blob.core.windows.net
-# MapTrace URL: https://api.leo.moe/tracemap/html/c14e439e-3250-5310-8965-42a1e3545266.html
+# MapTrace URL: https://api.nxtrace.org/tracemap/html/c14e439e-3250-5310-8965-42a1e3545266.html
 
 # Disable MPLS display using the --disable-mpls / -e parameter or the NEXTTRACE_DISABLEMPLS environment variable
 nexttrace --disable-mpls example.com
@@ -164,6 +181,17 @@ nexttrace --fast-trace
 
 # You can also use TCP SYN for testing
 nexttrace --fast-trace --tcp
+
+# You can also quickly test through a customized IP/DOMAIN list file
+nexttrace --file /path/to/your/iplist.txt
+# CUSTOMIZED IP DOMAIN LIST FILE FORMAT
+## One IP/DOMAIN per line + space + description information (optional)
+## forExample:
+## 106.37.67.1 BEIJING-TELECOM
+## 240e:928:101:31a::1 BEIJING-TELECOM
+## bj.10086.cn BEIJING-MOBILE
+## 2409:8080:0:1::1
+## 223.5.5.5
 ```
 
 `NextTrace` already supports route tracing for specified Network Devices
@@ -203,6 +231,8 @@ nexttrace --parallel-requests 1 www.hkix.net
 
 # Start Trace with TTL of 5, end at TTL of 10
 nexttrace --first 5 --max-hops 10 www.decix.net
+# In addition, an ENV is provided to set whether to hide the destination IP
+export NEXTTRACE_ENABLEHIDDENDSTIP=1
 
 # Turn off the IP reverse parsing function
 nexttrace --no-rdns www.bbix.net
@@ -220,6 +250,11 @@ nexttrace --psize 1024 example.com
 #  ╭╯
 #  ╰AS37963 Aliyun「ALIDNS.COM『ALIDNS.COM』」
 nexttrace --route-path www.time.com.my
+
+# Disable color output
+nexttrace --nocolor 1.1.1.1
+# or use ENV
+export NO_COLOR=1
 ```
 
 `NextTrace` supports users to select their own IP API (currently supports: `LeoMoeAPI`, `IP.SB`, `IPInfo`, `IPInsight`, `IPAPI.com`, `Ip2region`, `IPInfoLocal`, `CHUNZHEN`)
@@ -251,8 +286,8 @@ nexttrace --data-provider IPAPI.com --max-hops 20 --tcp --port 443 --queries 5 -
 nexttrace -tcp --queries 2 --parallel-requests 1 --table --route-path 2001:4860:4860::8888
 
 Equivalent to:
-nexttrace -d IPAPI.com -m 20 -T -p 443 -q 5 -n 1.1.1.1
-nexttrace -T -q 2 --parallel-requests 1 -t -R 2001:4860:4860::8888
+nexttrace -d ip-api.com -m 20 -T -p 443 -q 5 -n 1.1.1.1
+nexttrace -T -q 2 --parallel-requests 1 -t -P 2001:4860:4860::8888
 ```
 
 ### IP Database
@@ -278,15 +313,16 @@ Usage: nexttrace [-h|--help] [-4|--ipv4] [-6|--ipv6] [-T|--tcp] [-U|--udp]
                  <integer>] [--parallel-requests <integer>] [-m|--max-hops
                  <integer>] [-d|--data-provider
                  (Ip2region|ip2region|IP.SB|ip.sb|IPInfo|ipinfo|IPInsight|ipinsight|IPAPI.com|ip-api.com|IPInfoLocal|ipinfolocal|chunzhen|LeoMoeAPI|leomoeapi|disable-geoip)]
-                 [-n|--no-rdns] [-a|--always-rdns] [-P|--route-path]
-                 [-r|--report] [--dn42] [-o|--output] [-t|--table] [--raw]
-                 [-j|--json] [-c|--classic] [-f|--first <integer>] [-M|--map]
+                 [--pow-provider (api.nxtrace.org|sakura)] [-n|--no-rdns]
+                 [-a|--always-rdns] [-P|--route-path] [-r|--report] [--dn42]
+                 [-o|--output] [-t|--table] [--raw] [-j|--json] [-c|--classic]
+                 [-f|--first <integer>] [-M|--map] [-e|--disable-mpls]
                  [-v|--version] [-s|--source "<value>"] [-D|--dev "<value>"]
-                 [-R|--route] [-z|--send-time <integer>] [-i|--ttl-time
-                 <integer>] [--timeout <integer>] [--psize <integer>]
-                 [_positionalArg_nexttrace_31 "<value>"] [--dot-server
+                 [-z|--send-time <integer>] [-i|--ttl-time <integer>]
+                 [--timeout <integer>] [--psize <integer>]
+                 [_positionalArg_nexttrace_32 "<value>"] [--dot-server
                  (dnssb|aliyun|dnspod|google|cloudflare)] [-g|--language
-                 (en|cn)]
+                 (en|cn)] [--file "<value>"] [-C|--nocolor]
 
 Arguments:
 
@@ -317,9 +353,9 @@ Arguments:
                                      IPInfo, IPInsight, IP-API.com, Ip2region,
                                      IPInfoLocal, CHUNZHEN, disable-geoip].
                                      Default: LeoMoeAPI
-      --pow-provider                 Choose PoW Provider [api.leo.moe, sakura]
+      --pow-provider                 Choose PoW Provider [api.nxtrace.org, sakura]
                                      For China mainland users, please use
-                                     sakura. Default: api.leo.moe
+                                     sakura. Default: api.nxtrace.org
   -n  --no-rdns                      Do not resolve IP addresses to their
                                      domain names
   -a  --always-rdns                  Always resolve IP addresses to their
@@ -343,7 +379,6 @@ Arguments:
   -s  --source                       Use source src_addr for outgoing packets
   -D  --dev                          Use the following Network Devices as the
                                      source address in outgoing packets
-  -R  --route                        Show Routing Table [Provided By BGP.Tools]
   -z  --send-time                    Set how many [milliseconds] between
                                      sending each packet.. Useful when some
                                      routers use rate-limit for ICMP messages.
@@ -357,11 +392,13 @@ Arguments:
                                      connection.. Default: 1000
       --psize                        Set the packet size (payload size).
                                      Default: 52
-      --_positionalArg_nexttrace_31  IP Address or domain name
+      --_positionalArg_nexttrace_32  IP Address or domain name
       --dot-server                   Use DoT Server for DNS Parse [dnssb,
                                      aliyun, dnspod, google, cloudflare]
   -g  --language                     Choose the language for displaying [en,
                                      cn]. Default: cn
+      --file                         Read IP Address or domain name from file
+  -C  --nocolor                      Disable Colorful Output
 ```
 
 ## Project screenshot
@@ -384,7 +421,7 @@ This software is still in the early stages of development and may have many flaw
 
 [https://github.com/nxtrace/nexttracewebapi](https://github.com/nxtrace/nexttracewebapi)
 
-## LeoMoeAPI Credit
+## LeoMoeAPI Credits
 
 NextTrace focuses on Golang Traceroute implementations, and its LeoMoeAPI geolocation information is not supported by raw data, so a commercial version is not possible.
 
@@ -396,7 +433,7 @@ The LeoMoeAPI data is subject to copyright restrictions from multiple data sourc
 
 3. In terms of development, I would like to credit missuo and zhshch for their help with Go cross-compilation, design concepts and TCP/UDP Traceroute refactoring, and tsosunchia for their support on TraceMap.
 
-4. I would also like to credit FFEE_CO, TheresaQWQ, stydxm and others for their help. leoMoeAPI has received a lot of support since its first release, so I would like to credit them all!
+4. I would also like to credit FFEE_CO, TheresaQWQ, stydxm and others for their help. LeoMoeAPI has received a lot of support since its first release, so I would like to credit them all!
 
 We hope you can give us as much feedback as possible on IP geolocation errors (see issue) so that it can be calibrated in the first place and others can benefit from it.
 
@@ -409,31 +446,41 @@ We hope you can give us as much feedback as possible on IP geolocation errors (s
 
 ## Credits
 
-[sjlleo](https://github.com/sjlleo) The perpetual leader, founder, and core contributors of the NextTrace Project
+[IPInfo](https://ipinfo.io) Provided most of the data support for this project free of charge
 
-[BGP.TOOLS](https://bgp.tools) provided some data support for this project. And we would like to express our sincere gratitude.
+[BGP.TOOLS](https://bgp.tools) Provided some data support for this project free of charge
 
-[Vincent Young](https://github.com/missuo) (i@yyt.moe)
+[PeeringDB](https://www.peeringdb.com) Provided some data support for this project free of charge
 
-[Sam Sam](https://github.com/samleong123) (samsam123@samsam123.name.my)
+[sjlleo](https://github.com/sjlleo) The perpetual leader, founder, and core contributors
 
-[tsosunchia](https://github.com/tsosunchia)
+[tsosunchia](https://github.com/tsosunchia) The project chair, infra maintainer, and core contributors
+
+[Vincent Young](https://github.com/missuo)
+
+[zhshch2002](https://github.com/zhshch2002)
+
+[Sam Sam](https://github.com/samleong123)
 
 [waiting4new](https://github.com/waiting4new)
 
 [FFEE_CO](https://github.com/fkx4-p)
+
+[bobo liu](https://github.com/fakeboboliu)
+
+[YekongTAT](https://github.com/isyekong)
 
 ### Others
 
 Although other third-party APIs are integrated in this project, please refer to the official website of the third-party APIs for specific TOS and AUP. If you encounter IP data errors, please contact them directly to correct them.
 
 For feedback related to corrections about IP information, we currently have two channels available:
->- [IP 错误报告汇总帖](https://github.com/sjlleo/nexttrace/issues/41) in the GITHUB ISSUES section of this project (Recommended)
->- This project's dedicated correction email: `correction@moeqing.com` (Please note that this email is only for correcting IP-related information. For other feedback, please submit an ISSUE)
+>- [IP 错误报告汇总帖](https://github.com/orgs/nxtrace/discussions/222) in the GITHUB ISSUES section of this project (Recommended)
+>- This project's dedicated correction email: `correction@nxtrace.org` (Please note that this email is only for correcting IP-related information. For other feedback, please submit an ISSUE)
 
 How to obtain the freshly baked binary executable of the latest commit?
 > Please go to the most recent [Build & Release](https://github.com/nxtrace/Ntrace-V1/actions/workflows/build.yml) workflow in GitHub Actions.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=sjlleo/nexttrace&type=Date)](https://star-history.com/#sjlleo/nexttrace&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=nxtrace/NTrace-core&type=Date)](https://star-history.com/#nxtrace/NTrace-core&Date)

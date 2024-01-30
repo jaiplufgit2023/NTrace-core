@@ -75,6 +75,12 @@ jobs:
             goarch: mipsle
           - goos: linux
             goarch: mips
+          - goos: linux
+            goarch: mipsle
+            gomips: softfloat
+          - goos: linux
+            goarch: mips
+            gomips: softfloat
           # END MIPS
           # BEGIN PPC
           - goos: linux
@@ -104,6 +110,7 @@ jobs:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
       GOARM: ${{ matrix.goarm }}
+      GOMIPS: ${{ matrix.gomips }}
       CGO_ENABLED: 0
     steps:
       - name: Checkout codebase
@@ -117,13 +124,16 @@ jobs:
           if [ "$GOOS" == "windows" ]; then
             export _NAME="$_NAME.exe"
           fi
-          echo "GOOS: $GOOS, GOARCH: $GOARCH, GOARM: $GOARM, RELEASE_NAME: $_NAME"
+          if [ "$GOMIPS" == "softfloat" ]; then
+            export _NAME="${_NAME}_softfolat"
+          fi
+          echo "GOOS: $GOOS, GOARCH: $GOARCH, GOARM: $GOARM, GOMIPS: $GOMIPS, RELEASE_NAME: $_NAME"
           echo "ASSET_NAME=$_NAME" >> $GITHUB_ENV
           echo "BUILD_VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
           echo "BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
           echo "COMMIT_SHA1=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.21'
       - name: Get project dependencies
@@ -136,7 +146,7 @@ jobs:
                       -X 'github.com/nxtrace/NTrace-core/config.CommitID=${COMMIT_SHA1}'\
                       -w -s"
       - name: Upload files to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ASSET_NAME }}
           path: |
@@ -166,7 +176,7 @@ jobs:
           git config --global user.name "${{ secrets.git_name }}"
       - name: Clone repo
         run: |
-          git clone https://github.com/xgadget-lab/homebrew-nexttrace.git
+          git clone https://github.com/nxtrace/homebrew-nexttrace.git
       - name: Exec scipt
         run: |
           cd homebrew-nexttrace
@@ -183,7 +193,7 @@ jobs:
         run: |
           cd homebrew-nexttrace
           git commit -am 'Publish a new version with Formula' || true
-          git remote set-url origin https://${{ secrets.gt_token }}@github.com/xgadget-lab/homebrew-nexttrace.git
+          git remote set-url origin https://${{ secrets.gt_token }}@github.com/nxtrace/homebrew-nexttrace.git
           git push
         # env:
         #   SSH_AUTH_SOCK: /tmp/ssh_agent.sock

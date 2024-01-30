@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/nxtrace/NTrace-core/config"
 	"log"
@@ -21,6 +22,8 @@ var UserAgent = fmt.Sprintf("NextTrace %s/%s/%s", config.Version, runtime.GOOS, 
 var RdnsCache sync.Map
 var PowProviderParam = ""
 var DisableMPLS = GetenvDefault("NEXTTRACE_DISABLEMPLS", "")
+var EnableHidDstIP = GetenvDefault("NEXTTRACE_ENABLEHIDDENDSTIP", "")
+var DestIP string
 
 func LookupAddr(addr string) ([]string, error) {
 	// 如果在缓存中找到，直接返回
@@ -75,7 +78,7 @@ func LocalIPPortv6(dstip net.IP) (net.IP, int) {
 	return nil, -1
 }
 
-func DomainLookUp(host string, ipVersion string, dotServer string, disableOutput bool) net.IP {
+func DomainLookUp(host string, ipVersion string, dotServer string, disableOutput bool) (net.IP, error) {
 	// ipVersion: 4, 6, all
 	var (
 		r   *net.Resolver
@@ -101,8 +104,7 @@ func DomainLookUp(host string, ipVersion string, dotServer string, disableOutput
 		ips = append(ips, net.ParseIP(v))
 	}
 	if err != nil {
-		fmt.Println("Domain " + host + " Lookup Fail.")
-		os.Exit(1)
+		return nil, errors.New("DNS lookup failed")
 	}
 
 	//var ipv6Flag = false
@@ -119,16 +121,18 @@ func DomainLookUp(host string, ipVersion string, dotServer string, disableOutput
 		var filteredIPs []net.IP
 		for _, ip := range ips {
 			if ipVersion == "4" && ip.To4() != nil {
-				filteredIPs = append(filteredIPs, ip)
+				filteredIPs = []net.IP{ip}
+				break
 			} else if ipVersion == "6" && strings.Contains(ip.String(), ":") {
-				filteredIPs = append(filteredIPs, ip)
+				filteredIPs = []net.IP{ip}
+				break
 			}
 		}
 		ips = filteredIPs
 	}
 
 	if (len(ips) == 1) || (disableOutput) {
-		return ips[0]
+		return ips[0], nil
 	} else {
 		fmt.Println("Please Choose the IP You Want To TraceRoute")
 		for i, ip := range ips {
@@ -147,20 +151,24 @@ func DomainLookUp(host string, ipVersion string, dotServer string, disableOutput
 			fmt.Println("Your Option is invalid")
 			os.Exit(3)
 		}
-		return ips[index]
+		return ips[index], nil
 	}
 }
 
 func GetenvDefault(key, defVal string) string {
 	val, ok := os.LookupEnv(key)
 	if ok {
+		_, ok := os.LookupEnv("NEXTTRACE_DEBUG")
+		if ok {
+			fmt.Println("ENV", key, "detected as", val)
+		}
 		return val
 	}
 	return defVal
 }
 
 func GetHostAndPort() (host string, port string) {
-	var hostP = GetenvDefault("NEXTTRACE_HOSTPORT", "api.leo.moe")
+	var hostP = GetenvDefault("NEXTTRACE_HOSTPORT", "origin-fallback.nxtrace.org")
 	// 解析域名
 	hostArr := strings.Split(hostP, ":")
 	// 判断是否有指定端口
@@ -200,9 +208,9 @@ func GetProxy() *url.URL {
 }
 
 func GetPowProvider() string {
-	var powProvider = ""
+	var powProvider string
 	if PowProviderParam == "" {
-		powProvider = GetenvDefault("NEXTTRACE_POWPROVIDER", "api.leo.moe")
+		powProvider = GetenvDefault("NEXTTRACE_POWPROVIDER", "api.nxtrace.org")
 	} else {
 		powProvider = PowProviderParam
 	}
@@ -219,4 +227,18 @@ func StringInSlice(val string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func HideIPPart(ip string) string {
+	parsedIP := net.ParseIP(ip)
+	if parsedIP == nil {
+		return ""
+	}
+
+	if parsedIP.To4() != nil {
+		// IPv4: 隐藏后16位
+		return strings.Join(strings.Split(ip, ".")[:2], ".") + ".0.0/16"
+	}
+	// IPv6: 隐藏后96位
+	return parsedIP.Mask(net.CIDRMask(32, 128)).String() + "/32"
 }

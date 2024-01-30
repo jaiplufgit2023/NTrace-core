@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"log"
 	"net"
 	"os"
@@ -41,8 +42,8 @@ func Excute() {
 	maxHops := parser.Int("m", "max-hops", &argparse.Options{Default: 30, Help: "Set the max number of hops (max TTL to be reached)"})
 	dataOrigin := parser.Selector("d", "data-provider", []string{"Ip2region", "ip2region", "IP.SB", "ip.sb", "IPInfo", "ipinfo", "IPInsight", "ipinsight", "IPAPI.com", "ip-api.com", "IPInfoLocal", "ipinfolocal", "chunzhen", "LeoMoeAPI", "leomoeapi", "disable-geoip"}, &argparse.Options{Default: "LeoMoeAPI",
 		Help: "Choose IP Geograph Data Provider [IP.SB, IPInfo, IPInsight, IP-API.com, Ip2region, IPInfoLocal, CHUNZHEN, disable-geoip]"})
-	powProvider := parser.Selector("", "pow-provider", []string{"api.leo.moe", "sakura"}, &argparse.Options{Default: "api.leo.moe",
-		Help: "Choose PoW Provider [api.leo.moe, sakura] For China mainland users, please use sakura"})
+	powProvider := parser.Selector("", "pow-provider", []string{"api.nxtrace.org", "sakura"}, &argparse.Options{Default: "api.nxtrace.org",
+		Help: "Choose PoW Provider [api.nxtrace.org, sakura] For China mainland users, please use sakura"})
 	noRdns := parser.Flag("n", "no-rdns", &argparse.Options{Help: "Do not resolve IP addresses to their domain names"})
 	alwaysRdns := parser.Flag("a", "always-rdns", &argparse.Options{Help: "Always resolve IP addresses to their domain names"})
 	routePath := parser.Flag("P", "route-path", &argparse.Options{Help: "Print traceroute hop path by ASN and location"})
@@ -59,7 +60,7 @@ func Excute() {
 	ver := parser.Flag("v", "version", &argparse.Options{Help: "Print version info and exit"})
 	srcAddr := parser.String("s", "source", &argparse.Options{Help: "Use source src_addr for outgoing packets"})
 	srcDev := parser.String("D", "dev", &argparse.Options{Help: "Use the following Network Devices as the source address in outgoing packets"})
-	router := parser.Flag("R", "route", &argparse.Options{Help: "Show Routing Table [Provided By BGP.Tools]"})
+	//router := parser.Flag("R", "route", &argparse.Options{Help: "Show Routing Table [Provided By BGP.Tools]"})
 	packetInterval := parser.Int("z", "send-time", &argparse.Options{Default: 100, Help: "Set how many [milliseconds] between sending each packet.. Useful when some routers use rate-limit for ICMP messages"})
 	ttlInterval := parser.Int("i", "ttl-time", &argparse.Options{Default: 500, Help: "Set how many [milliseconds] between sending packets groups by TTL. Useful when some routers use rate-limit for ICMP messages"})
 	timeout := parser.Int("", "timeout", &argparse.Options{Default: 1000, Help: "The number of [milliseconds] to keep probe sockets open before giving up on the connection."})
@@ -69,6 +70,8 @@ func Excute() {
 		Help: "Use DoT Server for DNS Parse [dnssb, aliyun, dnspod, google, cloudflare]"})
 	lang := parser.Selector("g", "language", []string{"en", "cn"}, &argparse.Options{Default: "cn",
 		Help: "Choose the language for displaying [en, cn]"})
+	file := parser.String("", "file", &argparse.Options{Help: "Read IP Address or domain name from file"})
+	nocolor := parser.Flag("C", "nocolor", &argparse.Options{Help: "Disable Colorful Output"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -77,9 +80,17 @@ func Excute() {
 		fmt.Print(parser.Usage(err))
 		return
 	}
+
+	if *nocolor {
+		color.NoColor = true
+	} else {
+		color.NoColor = false
+	}
+
 	if !*jsonPrint {
 		printer.Version()
 	}
+
 	if *ver {
 		printer.CopyRight()
 		os.Exit(0)
@@ -91,7 +102,7 @@ func Excute() {
 		*port = 80
 	}
 
-	if *fast_trace {
+	if *fast_trace || *file != "" {
 		var paramsFastTrace = fastTrace.ParamsFastTrace{
 			SrcDev:         *srcDev,
 			SrcAddr:        *srcAddr,
@@ -102,6 +113,7 @@ func Excute() {
 			Lang:           *lang,
 			PktSize:        *packetSize,
 			Timeout:        time.Duration(*timeout) * time.Millisecond,
+			File:           *file,
 		}
 
 		fastTrace.FastTest(*tcp, *output, paramsFastTrace)
@@ -119,7 +131,12 @@ func Excute() {
 	}
 
 	if strings.Contains(domain, "/") {
-		domain = strings.Split(domain, "/")[2]
+		parts := strings.Split(domain, "/")
+		if len(parts) < 3 {
+			fmt.Println("Invalid input")
+			return
+		}
+		domain = parts[2]
 	}
 
 	if strings.Contains(domain, "]") {
@@ -158,7 +175,7 @@ func Excute() {
 	//	defer wg.Done()
 	if strings.ToUpper(*dataOrigin) == "LEOMOEAPI" {
 		val, ok := os.LookupEnv("NEXTTRACE_DATAPROVIDER")
-		if strings.ToUpper(*powProvider) != "API.LEO.MOE" {
+		if strings.ToUpper(*powProvider) != "API.NXTRACE.ORG" {
 			util.PowProviderParam = *powProvider
 		}
 		if ok {
@@ -181,15 +198,19 @@ func Excute() {
 			fmt.Println("[Info] IPv6 UDP Traceroute is not supported right now.")
 			os.Exit(0)
 		}
-		ip = util.DomainLookUp(domain, "4", *dot, *jsonPrint)
+		ip, err = util.DomainLookUp(domain, "4", *dot, *jsonPrint)
 	} else {
 		if *ipv6Only {
-			ip = util.DomainLookUp(domain, "6", *dot, *jsonPrint)
+			ip, err = util.DomainLookUp(domain, "6", *dot, *jsonPrint)
 		} else if *ipv4Only {
-			ip = util.DomainLookUp(domain, "4", *dot, *jsonPrint)
+			ip, err = util.DomainLookUp(domain, "4", *dot, *jsonPrint)
 		} else {
-			ip = util.DomainLookUp(domain, "all", *dot, *jsonPrint)
+			ip, err = util.DomainLookUp(domain, "all", *dot, *jsonPrint)
 		}
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	//}()
 	//
@@ -218,7 +239,7 @@ func Excute() {
 		printer.PrintTraceRouteNav(ip, domain, *dataOrigin, *maxHops, *packetSize)
 	}
 
-	var m trace.Method = ""
+	var m trace.Method
 
 	switch {
 	case *tcp:
@@ -233,6 +254,7 @@ func Excute() {
 		*port = 53
 	}
 
+	util.DestIP = ip.String()
 	var conf = trace.Config{
 		DN42:             *dn42,
 		SrcAddr:          *srcAddr,
@@ -252,6 +274,9 @@ func Excute() {
 		PktSize:          *packetSize,
 	}
 
+	// 暂时弃用
+	router := new(bool)
+	*router = false
 	if !*tablePrint {
 		if *classicPrint {
 			conf.RealtimePrinter = printer.ClassicPrinter

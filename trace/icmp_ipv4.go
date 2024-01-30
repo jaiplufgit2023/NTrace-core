@@ -15,6 +15,8 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
+
+	"github.com/nxtrace/NTrace-core/trace/internal"
 )
 
 type ICMPTracer struct {
@@ -39,6 +41,7 @@ func (t *ICMPTracer) PrintFunc() {
 		if t.AsyncPrinter != nil {
 			t.AsyncPrinter(&t.res)
 		}
+		// 接收的时候检查一下是不是 3 跳都齐了
 		if len(t.res.Hops)-1 > ttl {
 			if len(t.res.Hops[ttl]) == t.NumMeasurements {
 				if t.RealtimePrinter != nil {
@@ -66,7 +69,7 @@ func (t *ICMPTracer) Execute() (*Result, error) {
 
 	var err error
 
-	t.icmpListen, err = net.ListenPacket("ip4:1", t.SrcAddr)
+	t.icmpListen, err = internal.ListenICMP("ip4:1", t.SrcAddr)
 	if err != nil {
 		return &t.res, err
 	}
@@ -164,6 +167,9 @@ func (t *ICMPTracer) listenICMP() {
 							t.handleICMPMessage(msg, 0, rm.Body.(*icmp.TimeExceeded).Data, int(ttl))
 						case ipv4.ICMPTypeEchoReply:
 							t.handleICMPMessage(msg, 1, rm.Body.(*icmp.Echo).Data, int(ttl))
+						//unreachable
+						case ipv4.ICMPTypeDestinationUnreachable:
+							t.handleICMPMessage(msg, 2, rm.Body.(*icmp.DstUnreach).Data, int(ttl))
 						default:
 							// log.Println("received icmp message of unknown type", rm.Type)
 						}
@@ -176,6 +182,12 @@ func (t *ICMPTracer) listenICMP() {
 }
 
 func (t *ICMPTracer) handleICMPMessage(msg ReceivedMessage, icmpType int8, data []byte, ttl int) {
+	if icmpType == 2 {
+		if t.DestIP.String() != msg.Peer.String() {
+			return
+		}
+	}
+
 	t.inflightRequestRWLock.RLock()
 	defer t.inflightRequestRWLock.RUnlock()
 
